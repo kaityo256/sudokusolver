@@ -125,7 +125,7 @@ unsigned int Grid::solve_internal(std::string &answer) {
       if (n != 0 && n < min) {
         min_index = i;
         um = m;
-        if (n >= 2) {
+        if (n <= 2) {
           goto break_loop;
         }
       }
