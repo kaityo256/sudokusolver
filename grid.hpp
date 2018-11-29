@@ -2,7 +2,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <intrin.h>
+#else
 #include <x86intrin.h>
+#endif
+
 
 typedef unsigned __int128 mbit;
 
