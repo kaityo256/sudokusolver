@@ -2,7 +2,11 @@
 
 Grid::GridInitializer Grid::si;//マスクの初期化
 mbit Grid::unit_mask[27];
-mbit Grid::cell_mask[81];
+mbit Grid::kill_cell_mask[81];
+mbit Grid::kill_row_mask[81];
+mbit Grid::kill_column_mask[81];
+mbit Grid::kill_box_mask[81];
+const int Grid::box_index[81];
 
 // マスクの初期化
 void Grid::init(void) {
@@ -22,17 +26,43 @@ void Grid::init(void) {
   for (int i = 0; i < 9; i++) {
     unit_mask[i + 18] = b << (((i % 3) * 3) + (i / 3) * 27);
   }
+  // kill_cell_maskの作成
   for (int i = 0; i < 81; i++) {
     const int ri = i / 9;
     const int ci = i % 9;
     const int bi = (ci / 3) + (ri / 3) * 3;
     const mbit m = unit_mask[ri] | unit_mask[ci + 9] | unit_mask[bi + 18];
-    cell_mask[i] = ((mbit(1) << 81) - 1) & (~m);
+    kill_cell_mask[i] = ((mbit(1) << 81) - 1) & (~m);
+  }
+
+  // kill_maskの作成
+  // 行マスク
+  for (int i = 0; i < 81; i++) {
+    int r = i / 9;
+    int c = i % 9;
+    mbit m = mask81;
+    for (int j = 0; j < 9; j++) {
+      m ^= (mbit(1) <<  c) << (j * 9);
+    }
+    int bx = (i % 9) / 3;
+    int by = i / 27;
+    int bi = bx + by * 3;
+    mbit mb = mask81 ^ unit_mask[bi + 18];
+    mbit mr = mask81 ^ unit_mask[r];
+    m &= mr;
+    m &= mb;
+    kill_row_mask[i] = m;
+  }
+  for (int i = 0; i < 81; i++) {
+    int ix = i % 9;
+    int iy = i / 9;
+    int ti = iy + ix * 9; // Transpose
+    kill_column_mask[i] = kill_row_mask[ti];
   }
 }
 
 bool Grid::solved_squares(void) {
-  const mbit *g = num_mask;
+  const mbit *g = cell_mask;
   const mbit x1 = (g[0] ^ g[1] ^ g[2]);
   const mbit x2 = (g[3] ^ g[4] ^ g[5]);
   const mbit x3 = (g[6] ^ g[7] ^ g[8]);
@@ -53,7 +83,7 @@ bool Grid::solved_squares(void) {
   while (b) {
     const mbit p = (b & -b);
     for (int i = 0; i < 9; i++) {
-      if (p & num_mask[i]) {
+      if (p & cell_mask[i]) {
         put(bitpos(p), i + 1);
         flag = true;
       }
@@ -66,9 +96,9 @@ bool Grid::solved_squares(void) {
 bool Grid::hidden_singles(void) {
   static const mbit mzero = mbit(0);
   for (int i = 0; i < 9; i++) {
-    if (num_mask[i] == mzero)continue;
+    if (cell_mask[i] == mzero)continue;
     for (const auto &m : unit_mask) {
-      const mbit p = num_mask[i] & m;
+      const mbit p = cell_mask[i] & m;
       if ((popcnt_u128(p) == 1)) {
         put(bitpos(p), i + 1);
         return true;
@@ -89,6 +119,40 @@ void Grid::solve(std::string &str) {
   } else {
     std::cout << answer << std::endl;
   }
+}
+
+unsigned int Grid::solve_unit(std::string &answer) {
+  int min = 9;
+  int min_index = -1;
+  mbit um = 0;
+  for (int i = 0; i < 9; i++) {
+    const mbit nm = cell_mask[i];
+    if (nm == mbit(0))continue;
+    for (const auto &m : unit_mask) {
+      const int n = popcnt_u128(nm & m);
+      //assert(n!=1);
+      if (n != 0 && n < min) {
+        min_index = i;
+        um = m;
+        if (n <= 2) {
+          goto break_loop;
+        }
+      }
+    }
+  }
+break_loop:
+  mbit v = (cell_mask[min_index] & um);
+  int sum = 0;
+  while (v) {
+    const mbit p = (v & -v);
+    const int n = bitpos(p);
+    Grid g2 = (*this);
+    g2.put(n, min_index + 1);
+    sum = sum + g2.solve_internal(answer);
+    if (sum > 1)return sum;
+    v ^= p;
+  }
+  return sum;
 }
 
 // 解の数を返す
@@ -113,35 +177,65 @@ unsigned int Grid::solve_internal(std::string &answer) {
     }
     return 1;
   }
-  int min = 9;
-  int min_index = -1;
-  mbit um = 0;
+  mbit mtwo = find_two();
+  if (mtwo == mbit(0)) {
+    return solve_unit(answer);
+  }
+  /*
+  if (mtwo == mbit(0)) {
+    mbit t = mbit(0);
+    for (auto m : cell_mask) {
+      t |= m;
+    }
+    mtwo = t;
+  }
+  */
+  mtwo = mtwo & (-mtwo);
+  int pos = bitpos(mtwo);
+  int sum = 0;
   for (int i = 0; i < 9; i++) {
-    const mbit nm = num_mask[i];
-    if (nm == mbit(0))continue;
-    for (const auto &m : unit_mask) {
-      const int n = popcnt_u128(nm & m);
-      //assert(n!=1);
-      if (n != 0 && n < min) {
-        min_index = i;
-        um = m;
-        if (n <= 2) {
-          goto break_loop;
+    if (!(mtwo & cell_mask[i])) continue;
+    Grid g2 = (*this);
+    g2.put(pos, i + 1);
+    sum = sum + g2.solve_internal(answer);
+    if (sum > 1)return sum;
+  }
+
+  /*
+    // 2択を探す
+    int min = 9;
+    int min_index = -1;
+    mbit um = 0;
+    for (int i = 0; i < 9; i++) {
+      const mbit nm = cell_mask[i];
+      if (nm == mbit(0))continue;
+      for (const auto &m : unit_mask) {
+        const int n = popcnt_u128(nm & m);
+        //assert(n!=1);
+        if (n != 0 && n < min) {
+          min_index = i;
+          um = m;
+          if (n <= 2) {
+            goto break_loop;
+          }
         }
       }
     }
-  }
-break_loop:
-  mbit v = (num_mask[min_index] & um);
-  int sum = 0;
-  while (v) {
-    const mbit p = (v & -v);
-    const int n = bitpos(p);
-    Grid g2 = (*this);
-    g2.put(n, min_index + 1);
-    sum = sum + g2.solve_internal(answer);
-    if (sum > 1)return sum;
-    v ^= p;
-  }
+  break_loop:
+    mbit v = (cell_mask[min_index] & um);
+    show_mask();
+    std::cout << min_index << std::endl;
+    exit(1);
+    int sum = 0;
+    while (v) {
+      const mbit p = (v & -v);
+      const int n = bitpos(p);
+      Grid g2 = (*this);
+      g2.put(n, min_index + 1);
+      sum = sum + g2.solve_internal(answer);
+      if (sum > 1)return sum;
+      v ^= p;
+    }
+  */
   return sum;
 }
