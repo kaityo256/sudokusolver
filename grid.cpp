@@ -62,6 +62,8 @@ void Grid::init(void) {
 }
 
 bool Grid::solved_squares(void) {
+  mbit b = find_one();
+  /*
   const mbit *g = cell_mask;
   const mbit x1 = (g[0] ^ g[1] ^ g[2]);
   const mbit x2 = (g[3] ^ g[4] ^ g[5]);
@@ -79,6 +81,7 @@ bool Grid::solved_squares(void) {
   const mbit c2 = b2 & (mask81 ^ (o3 | o1));
   const mbit c3 = b3 & (mask81 ^ (o1 | o2));
   mbit b = c1 | c2 | c3;
+  */
   bool flag = false;
   while (b) {
     const mbit p = (b & -b);
