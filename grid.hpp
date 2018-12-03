@@ -132,27 +132,6 @@ class Grid {
         put(i, n);
       }
     }
-    // セル内一度を探す
-    mbit find_one(void) {
-      mbit *b = cell_mask;
-      mbit b01a = b[0] ^ b[1];
-      mbit b01b = ~(b[0] | b[1]);
-      mbit b23a = b[2] ^ b[3];
-      mbit b23b = ~(b[2] | b[3]);
-      mbit b03a = (b01a & b23b) | (b01b & b23a);
-      mbit b03b = b01b & b23b;
-      mbit  b45a = b[4] ^ b[5];
-      mbit  b45b = ~(b[4] | b[5]);
-      mbit  b67a = b[6] ^ b[7];
-      mbit  b67b = ~(b[6] | b[7]);
-      mbit  b47a = (b45a & b67b) | (b45b & b67a);
-      mbit  b47b = b45b & b67b;
-      mbit  b07a = (b03a & b47b) | (b03b & b47a);
-      mbit  b07b = b03b & b47b;
-      mbit b08 = (b07a & ~b[8]) | (b07b & b[8]);
-      return b08;
-    }
-
     // セル内二択を探す
     mbit find_two(void) {
       mbit *b = cell_mask;
@@ -193,7 +172,6 @@ class Grid {
         std::cout << cell_mask[i] << std::endl;
       }
       std::cout << std::endl;
-      find_one();
     }
     unsigned int solve_internal(std::string &answer);
     unsigned int solve_unit(std::string &answer);
