@@ -132,6 +132,77 @@ class Grid {
         put(i, n);
       }
     }
+    mbit find_single2(void) {
+      const mbit *g = cell_mask;
+      const mbit g01a = g[0] ^ g[1];
+      const mbit g01b = ~(g[0] | g[1]);
+      const mbit g23a = g[2] ^ g[3];
+      const mbit g23b = ~(g[2] | g[3]);
+      const mbit g03a = (g01a & g23b) | (g01b & g23a);
+      const mbit g03b = g01b & g23b;
+      const mbit g45a = g[4] ^ g[5];
+      const mbit g45b = ~(g[4] | g[5]);
+      const mbit g67a = g[6] ^ g[7];
+      const mbit g67b = ~(g[6] | g[7]);
+      const mbit g47a = (g45a & g67b) | (g45b & g67a);
+      const mbit g47b = g45b & g67b;
+      const mbit g07a = (g03a & g47b) | (g03b & g47a);
+      const mbit g07b = g03b & g47b;
+      mbit b = (g07a & ~g[8]) | (g07b & g[8]);
+      return b;
+    }
+
+    mbit find_single_kawai(void) {
+      const mbit *g = cell_mask;
+      mbit b = g[0] & g[1];
+      mbit s = g[0] | g[1];
+      b |= s & g[2];
+      s |= g[2];
+      b |= s & g[3];
+      s |= g[3];
+      b |= s & g[4];
+      s |= g[4];
+      b |= s & g[5];
+      s |= g[5];
+      b |= s & g[6];
+      s |= g[6];
+      b |= s & g[7];
+      s |= g[7];
+      b |= s & g[8];
+      s |= g[8];
+      /*
+      for (int i = 0; i < 9; i++) {
+        std::cout << g[i] << std::endl;
+      }
+      std::cout << std::endl;
+      std::cout << b << std::endl;
+      std::cout << s << std::endl;
+      std::cout << find_single_org() << std::endl;
+      */
+      return s ^ b;
+    }
+
+    mbit find_single_org(void) {
+      const mbit *g = cell_mask;
+      const mbit x1 = (g[0] ^ g[1] ^ g[2]);
+      const mbit x2 = (g[3] ^ g[4] ^ g[5]);
+      const mbit x3 = (g[6] ^ g[7] ^ g[8]);
+      const mbit a1 = (g[0] & g[1] & g[2]);
+      const mbit a2 = (g[3] & g[4] & g[5]);
+      const mbit a3 = (g[6] & g[7] & g[8]);
+      const mbit o1 = (g[0] | g[1] | g[2]);
+      const mbit o2 = (g[3] | g[4] | g[5]);
+      const mbit o3 = (g[6] | g[7] | g[8]);
+      const mbit b1 = x1 ^ a1;
+      const mbit b2 = x2 ^ a2;
+      const mbit b3 = x3 ^ a3;
+      const mbit c1 = b1 & (mask81 ^ (o2 | o3));
+      const mbit c2 = b2 & (mask81 ^ (o3 | o1));
+      const mbit c3 = b3 & (mask81 ^ (o1 | o2));
+      mbit b = c1 | c2 | c3;
+      return b;
+    }
+
     // セル内二択を探す
     mbit find_two(void) {
       mbit *b = cell_mask;
