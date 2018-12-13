@@ -59,7 +59,7 @@ private:
   // マスクの自動初期化用クラス
   class GridInitializer {
   public:
-    GridInitializer() { Grid::init(); };
+    GridInitializer() { Grid::init_masks(); };
   };
   static GridInitializer si;
 
@@ -75,24 +75,6 @@ private:
     return (cell_mask[n - 1] & (mbit(1) << index));
   }
 
-  // 数字をマスに置き、マスクの対応するビットを削除
-  void put(int i, int n) {
-    cell_mask[n - 1] &= kill_cell_mask[i];
-    mbit mm = mask81 ^ (mbit(1) << i);
-    for (auto &m : cell_mask) {
-      m &= mm;
-    }
-    data[i] = n;
-    /*
-    for (int j = 0; j < 9; j++) {
-      pos_row_mask[j] &= (mask81 ^ (mbit(1) << i));
-      pos_column_mask[j] &= (mask81 ^ (mbit(1) << i));
-    }
-    pos_row_mask[n - 1] &= kill_row_mask[i];
-    pos_column_mask[n - 1] &= kill_column_mask[i];
-    */
-    _rest--;
-  }
   bool solved_squares(void); // Naked Singles
   bool hidden_singles(void); // Hidden Singles
   // 現在の状態が正常かどうか
@@ -113,14 +95,21 @@ private:
   }
 
 public:
-  static void init(void);
-  Grid(const std::string &str) {
+  static void init_masks(void);
+
+  void init() {
     std::fill(&cell_mask[0], &cell_mask[9], mask81);
     std::fill(&pos_row_mask[0], &pos_row_mask[9], mask81);
     std::fill(&pos_column_mask[0], &pos_column_mask[9], mask81);
     std::fill(&data[0], &data[81], 0);
     _rest = 81;
     _valid = true;
+  }
+
+  Grid() { init(); }
+
+  Grid(const std::string &str) {
+    init();
     for (int i = 0; i < 81; i++) {
       const int n = str[i] - '0';
       if (n == 0)
@@ -131,6 +120,7 @@ public:
       put(i, n);
     }
   }
+
   mbit find_single2(void) {
     const mbit *g = cell_mask;
     const mbit g01a = g[0] ^ g[1];
@@ -259,6 +249,29 @@ public:
     return b2;
   }
 
+  //その場所で置ける数字のリストを返す
+  std::vector<int> get_possibles(int index) {
+    std::vector<int> v;
+    mbit m = mbit(1) << index;
+    for (int i = 0; i < 9; i++) {
+      if (cell_mask[i] & m) {
+        v.push_back(i + 1);
+      }
+    }
+    return v;
+  }
+
+  // 数字をマスに置き、マスクの対応するビットを削除
+  void put(int i, int n) {
+    cell_mask[n - 1] &= kill_cell_mask[i];
+    mbit mm = mask81 ^ (mbit(1) << i);
+    for (auto &m : cell_mask) {
+      m &= mm;
+    }
+    data[i] = n;
+    _rest--;
+  }
+
   // 現在のマスクの表示
   void show_mask() {
     for (int i = 0; i < 9; i++) {
@@ -266,7 +279,13 @@ public:
     }
     std::cout << std::endl;
   }
+
   unsigned int solve_internal(std::string &answer);
   unsigned int solve_unit(std::string &answer);
   static void solve(std::string &str);
+  bool is_unique() {
+    std::string ans;
+    int n = solve_internal(ans);
+    return (n == 1);
+  }
 };

@@ -9,7 +9,7 @@ mbit Grid::kill_box_mask[81];
 const int Grid::box_index[81];
 
 // マスクの初期化
-void Grid::init(void) {
+void Grid::init_masks(void) {
   mbit s = (1 << 9) - 1;
   mbit c = 1;
   mbit b = 7 | (mbit(7) << 9) | (mbit(7) << 18);
