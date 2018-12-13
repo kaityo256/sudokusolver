@@ -10,6 +10,8 @@ void test() {
 
 
 int main(int argc, char **argv) {
+  //test();
+  //return 1;
   if (argc < 2) {
     std::cout << "Usage: ./a.out filename" << std::endl;
     return 0;

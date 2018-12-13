@@ -1,6 +1,6 @@
 #include "grid.hpp"
 
-Grid::GridInitializer Grid::si;//マスクの初期化
+Grid::GridInitializer Grid::si; //マスクの初期化
 mbit Grid::unit_mask[27];
 mbit Grid::kill_cell_mask[81];
 mbit Grid::kill_row_mask[81];
@@ -42,7 +42,7 @@ void Grid::init(void) {
     int c = i % 9;
     mbit m = mask81;
     for (int j = 0; j < 9; j++) {
-      m ^= (mbit(1) <<  c) << (j * 9);
+      m ^= (mbit(1) << c) << (j * 9);
     }
     int bx = (i % 9) / 3;
     int by = i / 27;
@@ -62,9 +62,9 @@ void Grid::init(void) {
 }
 
 bool Grid::solved_squares(void) {
-  //mbit b = find_single2();
-  //mbit b = find_single_org();
-  mbit b = find_single_kawai();
+  // mbit b = find_single2();
+  mbit b = find_single_org();
+  // mbit b = find_single_kawai2();
   bool flag = false;
   while (b) {
     const mbit p = (b & -b);
@@ -82,7 +82,8 @@ bool Grid::solved_squares(void) {
 bool Grid::hidden_singles(void) {
   static const mbit mzero = mbit(0);
   for (int i = 0; i < 9; i++) {
-    if (cell_mask[i] == mzero)continue;
+    if (cell_mask[i] == mzero)
+      continue;
     for (const auto &m : unit_mask) {
       const mbit p = cell_mask[i] & m;
       if ((popcnt_u128(p) == 1)) {
@@ -113,10 +114,11 @@ unsigned int Grid::solve_unit(std::string &answer) {
   mbit um = 0;
   for (int i = 0; i < 9; i++) {
     const mbit nm = cell_mask[i];
-    if (nm == mbit(0))continue;
+    if (nm == mbit(0))
+      continue;
     for (const auto &m : unit_mask) {
       const int n = popcnt_u128(nm & m);
-      //assert(n!=1);
+      // assert(n!=1);
       if (n != 0 && n < min) {
         min_index = i;
         um = m;
@@ -135,7 +137,8 @@ break_loop:
     Grid g2 = (*this);
     g2.put(n, min_index + 1);
     sum = sum + g2.solve_internal(answer);
-    if (sum > 1)return sum;
+    if (sum > 1)
+      return sum;
     v ^= p;
   }
   return sum;
@@ -150,10 +153,13 @@ unsigned int Grid::solve_internal(std::string &answer) {
   // Naked/Hidden singlesで解けるだけ解く
   while (flag) {
     flag = false;
-    if (solved_squares())flag = true;
-    if (hidden_singles())flag = true;
+    if (solved_squares())
+      flag = true;
+    if (hidden_singles())
+      flag = true;
   }
-  if (!is_valid())return 0;
+  if (!is_valid())
+    return 0;
 
   if (_rest == 0) {
     // 解けたので解答をセット
@@ -167,61 +173,18 @@ unsigned int Grid::solve_internal(std::string &answer) {
   if (mtwo == mbit(0)) {
     return solve_unit(answer);
   }
-  /*
-  if (mtwo == mbit(0)) {
-    mbit t = mbit(0);
-    for (auto m : cell_mask) {
-      t |= m;
-    }
-    mtwo = t;
-  }
-  */
   mtwo = mtwo & (-mtwo);
   int pos = bitpos(mtwo);
   int sum = 0;
   for (int i = 0; i < 9; i++) {
-    if (!(mtwo & cell_mask[i])) continue;
+    if (!(mtwo & cell_mask[i]))
+      continue;
     Grid g2 = (*this);
     g2.put(pos, i + 1);
     sum = sum + g2.solve_internal(answer);
-    if (sum > 1)return sum;
+    if (sum > 1)
+      return sum;
   }
 
-  /*
-    // 2択を探す
-    int min = 9;
-    int min_index = -1;
-    mbit um = 0;
-    for (int i = 0; i < 9; i++) {
-      const mbit nm = cell_mask[i];
-      if (nm == mbit(0))continue;
-      for (const auto &m : unit_mask) {
-        const int n = popcnt_u128(nm & m);
-        //assert(n!=1);
-        if (n != 0 && n < min) {
-          min_index = i;
-          um = m;
-          if (n <= 2) {
-            goto break_loop;
-          }
-        }
-      }
-    }
-  break_loop:
-    mbit v = (cell_mask[min_index] & um);
-    show_mask();
-    std::cout << min_index << std::endl;
-    exit(1);
-    int sum = 0;
-    while (v) {
-      const mbit p = (v & -v);
-      const int n = bitpos(p);
-      Grid g2 = (*this);
-      g2.put(n, min_index + 1);
-      sum = sum + g2.solve_internal(answer);
-      if (sum > 1)return sum;
-      v ^= p;
-    }
-  */
   return sum;
 }
