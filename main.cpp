@@ -1,17 +1,17 @@
-#include <iostream>
-#include <fstream>
 #include "grid.hpp"
+#include <fstream>
+#include <iostream>
 
 void test() {
-  std::string str = "240007000008095200000003500000509007080000600000060018950000000107000000000004060";
-  str = "000000000000000001000002340000030400003560000054010020020780600080045200390006000";
-  Grid::solve(str);
+  std::string str =
+      "061007003092003000000000000008530000000000504500008000040000001000160800600000000";
+  //str =
+   //   "000000000000000000000000000000000000000000000000000000000000000000100000000000000";
+  Grid g(str);
+  g.show_unit_mask();
 }
 
-
 int main(int argc, char **argv) {
-  //test();
-  //return 1;
   if (argc < 2) {
     std::cout << "Usage: ./a.out filename" << std::endl;
     return 0;
