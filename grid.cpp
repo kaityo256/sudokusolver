@@ -3,9 +3,6 @@
 Grid::GridInitializer Grid::si; //マスクの初期化
 mbit Grid::unit_mask[27];
 mbit Grid::kill_cell_mask[81];
-mbit Grid::kill_row_mask[81];
-mbit Grid::kill_column_mask[81];
-mbit Grid::kill_box_mask[81];
 const int Grid::box_index[81];
 
 // マスクの初期化
@@ -33,31 +30,6 @@ void Grid::init_masks(void) {
     const int bi = (ci / 3) + (ri / 3) * 3;
     const mbit m = unit_mask[ri] | unit_mask[ci + 9] | unit_mask[bi + 18];
     kill_cell_mask[i] = ((mbit(1) << 81) - 1) & (~m);
-  }
-
-  // kill_maskの作成
-  // 行マスク
-  for (int i = 0; i < 81; i++) {
-    int r = i / 9;
-    int c = i % 9;
-    mbit m = mask81;
-    for (int j = 0; j < 9; j++) {
-      m ^= (mbit(1) << c) << (j * 9);
-    }
-    int bx = (i % 9) / 3;
-    int by = i / 27;
-    int bi = bx + by * 3;
-    mbit mb = mask81 ^ unit_mask[bi + 18];
-    mbit mr = mask81 ^ unit_mask[r];
-    m &= mr;
-    m &= mb;
-    kill_row_mask[i] = m;
-  }
-  for (int i = 0; i < 81; i++) {
-    int ix = i % 9;
-    int iy = i / 9;
-    int ti = iy + ix * 9; // Transpose
-    kill_column_mask[i] = kill_row_mask[ti];
   }
 }
 

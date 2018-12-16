@@ -51,11 +51,6 @@ private:
   //そのマスに置かれたら、どのcell_maskを消すべきかANDするマスク
   static mbit kill_cell_mask[81];
 
-  //そのマスに置かれたら、どのpos_maskを消すべきかANDするマスク
-  static mbit kill_row_mask[81];    //行
-  static mbit kill_column_mask[81]; //列
-  static mbit kill_box_mask[81];    //ボックス
-
   // マスクの自動初期化用クラス
   class GridInitializer {
   public:
@@ -67,8 +62,6 @@ private:
   bool _valid;       // 正常な状態かどうか
   int data[81];      //現在決定している数字
   mbit cell_mask[9]; // 各数字ごとにおける可能性のあるセル
-  mbit pos_row_mask[9]; // 各数字ごとにどの行ユニットに置けるかマスク
-  mbit pos_column_mask[9]; // 各数字ごとにどの列ユニットに置けるかのマスク
 
   // その場所にその数字がおけるか
   bool can_put(const int index, const int n) {
@@ -99,8 +92,6 @@ public:
 
   void init() {
     std::fill(&cell_mask[0], &cell_mask[9], mask81);
-    std::fill(&pos_row_mask[0], &pos_row_mask[9], mask81);
-    std::fill(&pos_column_mask[0], &pos_column_mask[9], mask81);
     std::fill(&data[0], &data[81], 0);
     _rest = 81;
     _valid = true;
