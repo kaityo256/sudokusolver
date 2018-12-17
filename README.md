@@ -3,7 +3,7 @@
 
 ## Summary
 
-Solve sudoku problems.
+Sudoku Solver. This is sample which denotes how to use sudoku\_lib.
 
 ## Usage
 
