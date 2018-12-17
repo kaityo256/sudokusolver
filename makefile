@@ -1,12 +1,10 @@
 all: a.out
-SRC=$(shell ls *.cpp)
-HED=$(shell ls *.hpp)
 
 CC=g++
 CPPFLAGS=-O3 -mavx2
 
-a.out: $(SRC) $(HED)
-	$(CC) $(CPPFLAGS) $(SRC) -o $@
+a.out: main.cpp sudoku_lib/grid.cpp
+	$(CC) $(CPPFLAGS) $^ -o $@
 
 
 .PHONY: clean
