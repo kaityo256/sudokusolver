@@ -12,6 +12,8 @@ void test() {
 }
 
 int main(int argc, char **argv) {
+  stopwatch::timer<> timer("all");
+  timer.start();
   if (argc < 2) {
     std::cout << "Usage: ./a.out filename" << std::endl;
     return 0;
@@ -26,4 +28,5 @@ int main(int argc, char **argv) {
   while (getline(ifs, line)) {
     Grid::solve(line);
   }
+  timer.stop();
 }
