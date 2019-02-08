@@ -2,20 +2,16 @@
 #include <fstream>
 #include <iostream>
 
-void test() {
-  std::string str =
-      "054000600000185000900000800000360710082000304000000060020009057009600000000070000";
-  Grid g(str);
-  for(auto m: g.cell_mask){
-    std::cout << m << std::endl;
-  }
+void hidden_singles_test() {
+  std::string str = "006002507000090000000006430500003600038020700020000000001900008400001050080050000";
+  Grid::solve(str);
 }
 
 int main(int argc, char **argv) {
-  test();
-  return 0;
-  stopwatch::timer<> timer("all");
-  timer.start();
+  //hidden_singles_test();
+  //return 0;
+  //stopwatch::timer<> timer("all");
+  //timer.start();
   if (argc < 2) {
     std::cout << "Usage: ./a.out filename" << std::endl;
     return 0;
@@ -30,5 +26,5 @@ int main(int argc, char **argv) {
   while (getline(ifs, line)) {
     Grid::solve(line);
   }
-  timer.stop();
+  //timer.stop();
 }
