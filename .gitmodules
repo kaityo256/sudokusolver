@@ -1,3 +1,6 @@
 [submodule "sudoku_lib"]
 	path = sudoku_lib
 	url = git@github.com:kaityo256/sudoku_lib.git
+[submodule "stopwatch"]
+	path = stopwatch
+	url = git@github.com:kaityo256/stopwatch.git
