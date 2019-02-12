@@ -2,69 +2,23 @@
 #include <fstream>
 #include <iostream>
 
-void test() {
-  std::string str =
-      "054000600000185000900000800000360710082000304000000060020009057009600000000070000";
-  Grid g(str);
-  mbit m = g.cell_mask[4];
-  std::cout << m << std::endl;
-  mbit mm[9] = {};
-  for (int i = 0; i < 9; i++) {
-    for (int j = 0; j < 9; j++) {
-      mm[i] |= (mbit(1) << (j * 9 + i));
-    }
-  }
-  mbit gm[9] = {};
-  for (int i = 0; i < 9; i++) {
-    gm[i] = ((m & mm[i]) >> i);
-  }
-  mbit gs = Grid::find_single(gm);
-  std::cout << gs << std::endl;
-}
-
-void test3() {
-  std::string str =
-      "450000060000185000009000080000360071280000430000000006020009705900600000000070000";
+void hidden_singles_row() {
+  // TODO:この入力でhidden_singles_rowが間違える
+  std::string str = "006002507000090000000006430500003600038020700020000000001900008400001050080050000";
+  //Grid g(str);
+  //g.hidden_singles_row();
   Grid::solve(str);
 }
 
-void test2() {
-  std::string str =
-      "450000060000185000009000080000360071280000430000000006020009705900600000000070000";
+void hidden_singles_column() {
+  std::string str = "400020090500080200009000000010300060080600007050000900000040700608730000000106500";
   Grid g(str);
-  mbit mm[9] = {};
-  for (int i = 0; i < 9; i++) {
-    for (int j = 0; j < 9; j++) {
-      mm[i] |= (mbit(1) << (j * 9 + i));
-    }
-  }
-  mbit m_row[9] = {};
-  for (int n = 0; n < 9; n++) {
-    mbit m = g.cell_mask[n];
-    for (int i = 0; i < 9; i++) {
-      m_row[i] |= (((m & mm[i]) >> i) << n);
-    }
-  }
-  for (int i = 0; i < 9; i++) {
-    std::cout << m_row[i] << std::endl;
-  }
-  mbit gs = Grid::find_single(m_row);
-  while (gs) {
-    mbit v = gs & -gs;
-    int n = bitpos(v) % 9;
-    int r = bitpos(v) / 9;
-    for (int i = 0; i < 9; i++) {
-      if (v & m_row[i]) {
-        std::cout << (n + 1) << ":" << (r * 9 + i) << std::endl;
-      }
-    }
-    gs ^= v;
-  }
+  //TODO:
 }
 
 int main(int argc, char **argv) {
-  // test3();
-  // return 0;
+  hidden_singles_row();
+  return 0;
   stopwatch::timer<> timer("all");
   timer.start();
   if (argc < 2) {
