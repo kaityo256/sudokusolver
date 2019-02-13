@@ -4,3 +4,4 @@ difficult.txt
 difficult_a.txt
 *.txt
 .clang-format
+.vscode
