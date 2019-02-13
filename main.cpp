@@ -19,7 +19,7 @@ void hidden_singles_column() {
 }
 
 void make_unit_mask() {
-  std::string str = "000000000000000001000002340003054010056010000070000460005007002008106900090800700";
+  std::string str = "000000000000000001000012340000500010003006700026000030001050604008790000500008007";
   Grid g(str);
   mbit m_row[9] = {};
   mbit m_column[9] = {};
@@ -55,6 +55,7 @@ void make_unit_mask() {
     gs ^= v;
   }
 
+  // Hidden singles in columns
   gs = Grid::find_single(m_column);
   while (gs) {
     mbit v = gs & -gs;
@@ -67,10 +68,22 @@ void make_unit_mask() {
     }
     gs ^= v;
   }
-
-  std::cout << Grid::find_single(m_row) << std::endl;
-  std::cout << Grid::find_single(m_column) << std::endl;
-  std::cout << Grid::find_single(m_box) << std::endl;
+  // Hidden singles in boxes
+  gs = Grid::find_single(m_box);
+  while (gs) {
+    mbit v = gs & -gs;
+    int n = bitpos(v) / 9 + 1;  //どの数字か
+    int bindex = bitpos(v) % 9; //どのボックスか
+    for (int i = 0; i < 9; i++) {
+      if (m_box[i] & v) {
+        int br = (bindex / 3) * 3 + (i / 3);
+        int bc = (bindex % 3) * 3 + (i % 3);
+        int pos = bc + br * 9;
+        printf("%d on %d (box)\n", n, pos);
+      }
+    }
+    gs ^= v;
+  }
 }
 
 int main(int argc, char **argv) {
