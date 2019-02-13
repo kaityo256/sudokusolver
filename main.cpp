@@ -8,7 +8,6 @@ void hidden_singles_test() {
 }
 
 int main(int argc, char **argv) {
-  hidden_singles_test();
   return 0;
   stopwatch::timer<> timer("all");
   timer.start();
