@@ -3,24 +3,79 @@
 #include <iostream>
 
 void hidden_singles_row() {
-  // TODO:この入力でhidden_singles_rowが間違える
-  std::string str = "0060025070000900000000064305000036000380207000200000000019"
-                    "00008400001050080050000";
-  // Grid g(str);
-  // g.hidden_singles_row();
-  Grid::solve(str);
+  std::string str = "006002507000090000000006430500003600038020700020000000001900008400001050080050000";
+  Grid g(str);
+  mbit m_row[9];
+  g.get_hidden_singles_row(m_row);
+  for (auto m : m_row) {
+    std::cout << m << std::endl;
+  }
 }
 
 void hidden_singles_column() {
-  std::string str = "4000200905000802000090000000103000600806000070500009000000"
-                    "40700608730000000106500";
+  // hidden_singles_rowの入力を転置したもの。
+  // 同じ結果を出力しなければならない
+  //std::string str = "000500040000032008600080100000000900090020005206300010504670000003000050700000800";
+}
+
+void make_unit_mask() {
+  std::string str = "000000000000000001000002340003054010056010000070000460005007002008106900090800700";
   Grid g(str);
-  // TODO:
+  mbit m_row[9] = {};
+  mbit m_column[9] = {};
+  mbit m_box[9] = {};
+
+  for (int n = 0; n < 9; n++) {
+    for (int i = 0; i < 81; i++) {
+      if (g.cell_mask[n] & (mbit(1) << i)) {
+        int r = i % 9;
+        int c = i / 9;
+        int br = r % 3;
+        int bc = c % 3;
+        int b = br + bc * 3;            //ボックス内インデックス
+        int bi = (r / 3) + (c / 3) * 3; //ボックスのインデックス
+        m_row[r] |= mbit(1) << (c + n * 9);
+        m_column[c] |= mbit(1) << (r + n * 9);
+        m_box[b] |= mbit(1) << (bi + n * 9);
+      }
+    }
+  }
+  // Hidden singles in rows
+  mbit gs;
+  gs = Grid::find_single(m_row);
+  while (gs) {
+    mbit v = gs & -gs;
+    int n = bitpos(v) / 9 + 1;
+    int r = bitpos(v) % 9;
+    for (int i = 0; i < 9; i++) {
+      if (m_row[i] & v) {
+        printf("%d on %d (row)\n", n, i + r * 9);
+      }
+    }
+    gs ^= v;
+  }
+
+  gs = Grid::find_single(m_column);
+  while (gs) {
+    mbit v = gs & -gs;
+    int n = bitpos(v) / 9 + 1;
+    int c = bitpos(v) % 9;
+    for (int i = 0; i < 9; i++) {
+      if (m_column[i] & v) {
+        printf("%d on %d (column)\n", n, c + i * 9);
+      }
+    }
+    gs ^= v;
+  }
+
+  std::cout << Grid::find_single(m_row) << std::endl;
+  std::cout << Grid::find_single(m_column) << std::endl;
+  std::cout << Grid::find_single(m_box) << std::endl;
 }
 
 int main(int argc, char **argv) {
-  // hidden_singles_row();
-  // return 0;
+  make_unit_mask();
+  return 0;
   stopwatch::timer<> timer("all");
   timer.start();
   if (argc < 2) {
