@@ -5,3 +5,5 @@ difficult_a.txt
 *.txt
 .clang-format
 .vscode
+test.dat
+*.ans
