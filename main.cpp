@@ -2,16 +2,17 @@
 #include <fstream>
 #include <iostream>
 
-void hidden_singles_test() {
-  std::string str = "006002507000090000000006430500003600038020700020000000001900008400001050080050000";
+//セル内二択テスト
+void alt_test() {
+  std::string str = "000000000000000001001023040000500020002041600070000000004036702060050030800900060";
   Grid::solve(str);
 }
 
 int main(int argc, char **argv) {
-  //hidden_singles_test();
+  //alt_test();
   //return 0;
-  //stopwatch::timer<> timer("all");
-  //timer.start();
+  stopwatch::timer<> timer("all");
+  timer.start();
   if (argc < 2) {
     std::cout << "Usage: ./a.out filename" << std::endl;
     return 0;
@@ -26,5 +27,5 @@ int main(int argc, char **argv) {
   while (getline(ifs, line)) {
     Grid::solve(line);
   }
-  //timer.stop();
+  timer.stop();
 }
